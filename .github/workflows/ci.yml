@@ -20,7 +20,7 @@ jobs:
           node-version: 18
 
       - name: Run ESLint
-        run: bun run lint
+        run: npm run lint
 
       - name: Build project
-        run: bun run build
+        run: npm run build
