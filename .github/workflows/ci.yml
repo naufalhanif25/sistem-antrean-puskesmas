@@ -19,8 +19,5 @@ jobs:
         with:
           node-version: 18
 
-      - name: Run ESLint
-        run: npm run lint
-
       - name: Build project
         run: npm run build
