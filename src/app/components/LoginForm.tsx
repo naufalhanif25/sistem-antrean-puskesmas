@@ -1,11 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { showToast } from "@/lib/toast";
+import { set } from "zod";
 
 export default function LoginForm() {
+    const router = useRouter();
+
     const [nip, setNip] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState<"ADMIN" | "DOKTER">("ADMIN");
+    const [role, setRole] = useState<"ADMIN" | "DOKTER" | "LAYAR">("ADMIN");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [isDark, setIsDark] = useState(false);
@@ -16,12 +21,37 @@ export default function LoginForm() {
         setError("");
 
         try {
-            // TODO: Logika untuk login
-        } 
-        catch {
-            setError("Terjadi kesalahan saat login");
-        } 
-        finally {
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ nip, password, role }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                // setError(data.error || "Login gagal");
+                showToast(data.error || "Login gagal", "error");
+                return;
+            }
+
+            showToast("Login berhasil!", "success");
+
+            setTimeout(() => {
+                if (data.role === "ADMIN") {
+                    router.push("/admin");
+                } else if (data.role === "DOKTER") {
+                    router.push("/dokter");
+                } else if (data.role === "LAYAR") {
+                    router.push("/layar");
+                }
+            }, 500);
+        } catch {
+            // setError("Terjadi kesalahan saat login");
+            showToast("Terjadi kesalahan saat login", "error");
+        } finally {
             setIsLoading(false);
         }
     };
@@ -47,6 +77,7 @@ export default function LoginForm() {
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                 </svg>
             </button>
+
             <div className="text-center mb-8">
                 <div
                     className="mx-auto mb-4 w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300"
@@ -66,17 +97,11 @@ export default function LoginForm() {
                             color: isDark ? "#E5E7EB" : "#374151",
                         }}
                     >
-                        <rect
-                            x="3"
-                            y="11"
-                            width="18"
-                            height="11"
-                            rx="2"
-                            ry="2"
-                        />
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
                         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                     </svg>
                 </div>
+
                 <h1
                     className="text-3xl font-bold mb-1 transition-colors duration-300"
                     style={{
@@ -85,6 +110,7 @@ export default function LoginForm() {
                 >
                     Autentikasi Pengguna
                 </h1>
+
                 <p
                     className="text-sm tracking-widest transition-colors duration-300"
                     style={{
@@ -94,6 +120,7 @@ export default function LoginForm() {
                     PORTAL AKSES AMAN
                 </p>
             </div>
+
             <div
                 className="w-full max-w-md rounded-2xl p-8 transition-all duration-300"
                 style={{
@@ -126,6 +153,7 @@ export default function LoginForm() {
                             }}
                         />
                     </div>
+
                     <div>
                         <label
                             className="block mb-2 text-sm font-medium transition-colors duration-300"
@@ -151,6 +179,7 @@ export default function LoginForm() {
                             }}
                         />
                     </div>
+
                     <div>
                         <label
                             className="block mb-3 text-sm font-medium transition-colors duration-300"
@@ -160,8 +189,9 @@ export default function LoginForm() {
                         >
                             Masuk sebagai
                         </label>
+
                         <div className="flex gap-3">
-                            {(["ADMIN", "DOKTER"] as const).map((r) => (
+                            {(["ADMIN", "DOKTER", "LAYAR"] as const).map((r) => (
                                 <button
                                     key={r}
                                     type="button"
@@ -198,11 +228,12 @@ export default function LoginForm() {
                                                 : "none",
                                     }}
                                 >
-                                    {r === "ADMIN" ? "Admin" : "Dokter"}
+                                    {r === "ADMIN" ? "Admin" : r === "DOKTER" ? "Dokter" : "Layar"}
                                 </button>
                             ))}
                         </div>
                     </div>
+
                     {error && (
                         <div
                             className="rounded-lg p-3 text-sm transition-colors duration-300"
@@ -217,6 +248,7 @@ export default function LoginForm() {
                             {error}
                         </div>
                     )}
+
                     <button
                         type="submit"
                         disabled={isLoading}
@@ -234,68 +266,26 @@ export default function LoginForm() {
                                     ? "1px solid #1F1F1F"
                                     : "1px solid #404145"
                                 : "1px solid #DC2626",
-                            color: isLoading
-                                ? isDark
-                                    ? "#6B7280"
-                                    : "#FFFFFF"
-                                : "#FFFFFF",
-                            cursor: isLoading ? "not-allowed" : "pointer",
-                            opacity: isLoading ? 0.6 : 1,
-                            boxShadow:
-                                !isLoading && !isDark
-                                    ? "0 4px 6px -1px rgba(220, 38, 38, 0.2), 0 2px 4px -2px rgba(220, 38, 38, 0.2)"
-                                    : "none",
+                            color: "#FFFFFF",
                         }}
                     >
-                        {isLoading ? (
-                            <>
-                                <svg
-                                    className="animate-spin h-5 w-5"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                        className="opacity-25"
-                                        cx="12"
-                                        cy="12"
-                                        r="10"
-                                        stroke="currentColor"
-                                        strokeWidth="4"
-                                    />
-                                    <path
-                                        className="opacity-75"
-                                        fill="currentColor"
-                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    />
-                                </svg>
-                                Memproses...
-                            </>
-                        ) : (
-                            <>
-                                <svg
-                                    className="w-5 h-5"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <rect
-                                        x="3"
-                                        y="11"
-                                        width="18"
-                                        height="11"
-                                        rx="2"
-                                        ry="2"
-                                    />
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                </svg>
-                                Masuk
-                            </>
-                        )}
+                        {isLoading ? "Memproses..." : "Masuk"}
                     </button>
                 </form>
+
+                <div className="mt-4 text-center">
+                    <button
+                        type="button"
+                        onClick={() => router.push("/daftar")}
+                        className="text-sm transition-colors duration-300 underline"
+                        style={{
+                            color: isDark ? "#9CA3AF" : "#6B7280",
+                        }}
+                    >
+                        Belum punya akun? Daftar
+                    </button>
+                </div>
+
                 <p
                     className="mt-6 text-center text-xs transition-colors duration-300"
                     style={{
@@ -305,6 +295,7 @@ export default function LoginForm() {
                     Akses tanpa izin dilarang. Tindakan Anda mungkin akan dicatat.
                 </p>
             </div>
+
             <p
                 className="mt-8 text-xs transition-colors duration-300"
                 style={{

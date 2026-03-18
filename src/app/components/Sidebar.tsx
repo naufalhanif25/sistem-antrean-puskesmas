@@ -2,6 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { showToast } from "@/lib/toast";
 
 interface SidebarProps {
     userEmail?: string;
@@ -18,8 +20,30 @@ export default function Sidebar({
     const [isOpen, setIsOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
+    const router = useRouter();
+
     const handleLogout = async () => {
-        // TODO: Logika log out
+       try {
+            const res = await fetch("/api/logout", {
+                method: "POST",
+            });
+
+            if (!res.ok) {
+                showToast("Gagal logout", "error");
+                return;
+            }
+
+            showToast("Berhasil logout", "success");
+
+            // redirect ke login
+            setTimeout(() => {
+                router.push("/");
+                router.refresh();
+            }, 500);
+
+    } catch {
+        showToast("Terjadi kesalahan saat logout", "error");
+    }
     };
 
     const menuItems = [
