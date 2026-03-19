@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function AdminPage() {
     const router = useRouter();
@@ -11,12 +11,16 @@ export default function AdminPage() {
             const res = await fetch("/api/me");
 
             if (!res.ok) {
-                router.push("/");
+                router.replace("/");
+            } else {
+                router.replace("/admin/pendaftaran");
             }
         };
 
         checkAuth();
-    }, []);
+    }, [router]);
 
-    redirect("/admin/pendaftaran");
+    return (
+        <div className="flex h-screen bg-white"></div>
+    );
 }
