@@ -3,19 +3,20 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
-import { set } from "zod";
+import { UserRole, PasswordInput } from "../props/UserData";
+import { EyeOff, Eye } from "lucide-react";
 
 export default function LoginForm() {
     const router = useRouter();
-
     const [nip, setNip] = useState("");
+    const [passwordInput, setPasswordInput] = useState<PasswordInput>("password");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState<"ADMIN" | "DOKTER" | "LAYAR">("ADMIN");
+    const [role, setRole] = useState<UserRole>("ADMIN");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [isDark, setIsDark] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");
@@ -28,17 +29,15 @@ export default function LoginForm() {
                 },
                 body: JSON.stringify({ nip, password, role }),
             });
-
             const data = await res.json();
 
             if (!res.ok) {
-                // setError(data.error || "Login gagal");
                 showToast(data.error || "Login gagal", "error");
                 return;
             }
+            localStorage.setItem("user", JSON.stringify(data));
 
             showToast("Login berhasil!", "success");
-
             setTimeout(() => {
                 if (data.role === "ADMIN") {
                     router.push("/admin");
@@ -48,9 +47,8 @@ export default function LoginForm() {
                     router.push("/layar");
                 }
             }, 500);
-        } catch {
-            // setError("Terjadi kesalahan saat login");
-            showToast("Terjadi kesalahan saat login", "error");
+        } catch (error) {
+            showToast(error.message || "Terjadi kesalahan saat login", "error");
         } finally {
             setIsLoading(false);
         }
@@ -77,7 +75,6 @@ export default function LoginForm() {
                     <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
                 </svg>
             </button>
-
             <div className="text-center mb-8">
                 <div
                     className="mx-auto mb-4 w-20 h-20 rounded-2xl flex items-center justify-center transition-all duration-300"
@@ -110,7 +107,6 @@ export default function LoginForm() {
                 >
                     Autentikasi Pengguna
                 </h1>
-
                 <p
                     className="text-sm tracking-widest transition-colors duration-300"
                     style={{
@@ -120,7 +116,6 @@ export default function LoginForm() {
                     PORTAL AKSES AMAN
                 </p>
             </div>
-
             <div
                 className="w-full max-w-md rounded-2xl p-8 transition-all duration-300"
                 style={{
@@ -153,7 +148,6 @@ export default function LoginForm() {
                             }}
                         />
                     </div>
-
                     <div>
                         <label
                             className="block mb-2 text-sm font-medium transition-colors duration-300"
@@ -163,23 +157,50 @@ export default function LoginForm() {
                         >
                             Kata sandi
                         </label>
-                        <input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Masukkan Password Anda"
-                            required
-                            className="w-full rounded-lg px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-2"
-                            style={{
-                                backgroundColor: isDark ? "#0D0D0D" : "#FFFFFF",
-                                border: isDark
-                                    ? "1px solid #2A2A2A"
-                                    : "1px solid #D1D5DB",
-                                color: isDark ? "#FFFFFF" : "#111827",
-                            }}
-                        />
+                        <div className="flex gap-2 items-center justify-center">
+                            <input
+                                type={passwordInput}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Masukkan Password Anda"
+                                required
+                                className="w-full rounded-lg px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-2"
+                                style={{
+                                    backgroundColor: isDark ? "#0D0D0D" : "#FFFFFF",
+                                    border: isDark
+                                        ? "1px solid #2A2A2A"
+                                        : "1px solid #D1D5DB",
+                                    color: isDark ? "#FFFFFF" : "#111827",
+                                }}
+                            />
+                            <button 
+                                type="button"
+                                onClick={() => setPasswordInput(passwordInput == "password" ? "text" : "password")}
+                                className="rounded-lg px-4 py-3 w-fit flex items-center justify-center"
+                                style={{
+                                    backgroundColor: isDark ? "#0D0D0D" : "#FFFFFF",
+                                    border: isDark
+                                        ? "1px solid #2A2A2A"
+                                        : "1px solid #D1D5DB",
+                                    color: isDark ? "#FFFFFF" : "#111827",
+                                }}
+                            >
+                                {passwordInput == "password" ? (
+                                    <Eye 
+                                        size={24} 
+                                        strokeWidth={1} 
+                                        color={isDark ? "#FFFFFF" : "#111827"} 
+                                    />
+                                ): (
+                                    <EyeOff 
+                                        size={24} 
+                                        strokeWidth={1} 
+                                        color={isDark ? "#FFFFFF" : "#111827"} 
+                                    />
+                                )}
+                            </button>
+                        </div>
                     </div>
-
                     <div>
                         <label
                             className="block mb-3 text-sm font-medium transition-colors duration-300"
@@ -233,7 +254,6 @@ export default function LoginForm() {
                             ))}
                         </div>
                     </div>
-
                     {error && (
                         <div
                             className="rounded-lg p-3 text-sm transition-colors duration-300"
@@ -248,7 +268,6 @@ export default function LoginForm() {
                             {error}
                         </div>
                     )}
-
                     <button
                         type="submit"
                         disabled={isLoading}
@@ -272,20 +291,6 @@ export default function LoginForm() {
                         {isLoading ? "Memproses..." : "Masuk"}
                     </button>
                 </form>
-
-                <div className="mt-4 text-center">
-                    <button
-                        type="button"
-                        onClick={() => router.push("/daftar")}
-                        className="text-sm transition-colors duration-300 underline"
-                        style={{
-                            color: isDark ? "#9CA3AF" : "#6B7280",
-                        }}
-                    >
-                        Belum punya akun? Daftar
-                    </button>
-                </div>
-
                 <p
                     className="mt-6 text-center text-xs transition-colors duration-300"
                     style={{
@@ -295,7 +300,6 @@ export default function LoginForm() {
                     Akses tanpa izin dilarang. Tindakan Anda mungkin akan dicatat.
                 </p>
             </div>
-
             <p
                 className="mt-8 text-xs transition-colors duration-300"
                 style={{

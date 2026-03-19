@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
+import { UserData } from "../props/UserData";
 
 interface SidebarProps {
     userEmail?: string;
@@ -12,14 +13,12 @@ interface SidebarProps {
 }
 
 export default function Sidebar({
-    userEmail = "AdminPuskesmas@gmail.com",
-    userRole = "Admin",
     isDark = false,
 }: SidebarProps) {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
+    const [userData, setUserData] = useState<UserData | null>(null);
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -32,42 +31,30 @@ export default function Sidebar({
                 showToast("Gagal logout", "error");
                 return;
             }
+            localStorage.removeItem("user");
 
             showToast("Berhasil logout", "success");
-
-            // redirect ke login
             setTimeout(() => {
                 router.push("/");
                 router.refresh();
             }, 500);
 
-    } catch {
-        showToast("Terjadi kesalahan saat logout", "error");
-    }
+        } catch (error) {
+            showToast(error.message || "Terjadi kesalahan saat logout", "error");
+        }
+    };
+    
+    const getUserData = (setAction: (value: React.SetStateAction<UserData>) => void) => {
+        const data = localStorage.getItem("user");
+        if (!data) throw new Error("Gagal ambil pengguna");
+        setAction(JSON.parse(data));
     };
 
+    useEffect(() => {
+        getUserData(setUserData);
+    }, []);
+
     const menuItems = [
-        {
-            icon: (
-                <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <rect x="3" y="3" width="7" height="7" />
-                    <rect x="14" y="3" width="7" height="7" />
-                    <rect x="14" y="14" width="7" height="7" />
-                    <rect x="3" y="14" width="7" height="7" />
-                </svg>
-            ),
-            label: "Dashboard",
-            href: "/admin",
-            clickable: false,
-        },
         {
             icon: (
                 <svg
@@ -86,8 +73,7 @@ export default function Sidebar({
                 </svg>
             ),
             label: "Pendaftaran",
-            href: "/admin/pendaftaran",
-            clickable: true,
+            href: "/admin/pendaftaran"
         },
         {
             icon: (
@@ -107,8 +93,27 @@ export default function Sidebar({
                 </svg>
             ),
             label: "Daftar Antrean",
-            href: "/admin/daftar-antrean",
-            clickable: true,
+            href: "/admin/daftar-antrean"
+        },
+        {
+            icon: (
+                <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 11h-6" />
+                    <path d="M19 8v6" />
+                </svg>
+            ),
+            label: "Registrasi Dokter",
+            href: "/admin/regis-dokter"
         },
         {
             icon: (
@@ -127,8 +132,7 @@ export default function Sidebar({
                 </svg>
             ),
             label: "Layar",
-            href: "/admin/layar",
-            clickable: true,
+            href: "/admin/layar"
         },
     ];
 
@@ -250,16 +254,13 @@ export default function Sidebar({
             )}
             <nav className="flex-1 overflow-y-auto px-4 pb-4">
                 <div className={`${isSidebarOpen ? "space-y-2" : "space-y-3"}`}>
-                    {menuItems.map((item) => {
+                    {menuItems.map((item, index) => {
                         const isActive = pathname === item.href;
 
-                        if (!item.clickable) {
-                            return null;
-                        }
                         return (
                             <a
-                                key={item.href}
-                                href={item.href}
+                                key={index}
+                                href={isActive ? null : item.href}
                                 className={`flex items-center rounded-lg transition-all duration-300 group ${
                                     isSidebarOpen
                                         ? "gap-3 px-4 py-3"
@@ -348,7 +349,7 @@ export default function Sidebar({
                                 color: isDark ? "#E5E7EB" : "#374151",
                             }}
                         >
-                            {userEmail.at(0).toUpperCase()}
+                            {(userData?.name || "Admin").at(0).toUpperCase()}
                         </div>
                         {isSidebarOpen && (
                             <div className="flex-1 text-left min-w-0">
@@ -358,7 +359,7 @@ export default function Sidebar({
                                         color: isDark ? "#E5E7EB" : "#374151",
                                     }}
                                 >
-                                    {userEmail}
+                                    {(userData?.name || "Admin")}
                                 </p>
                                 <p
                                     className="text-xs transition-colors duration-300"
@@ -366,7 +367,7 @@ export default function Sidebar({
                                         color: isDark ? "#6B7280" : "#9CA3AF",
                                     }}
                                 >
-                                    {userRole}
+                                    {userData?.nip}
                                 </p>
                             </div>
                         )}
