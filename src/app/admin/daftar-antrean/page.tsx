@@ -4,7 +4,7 @@ import Sidebar from "@/app/components/Sidebar";
 import { useState, useCallback } from "react";
 import { useEffect } from "react";
 import { showToast } from "@/lib/toast";
-import { QueueStatus } from "@/app/props/UserData";
+import { QueueStatus, UserData } from "@/app/props/UserData";
 
 interface QueueItem {
     id: number;
@@ -17,6 +17,7 @@ interface QueueItem {
 export default function DaftarAntreanPage() {
     const [isDark, setIsDark] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [userData, setUserData] = useState<UserData | null>(null);
     const [isRefreshHovered, setIsRefreshHovered] = useState(false);
     const [isExportHovered, setIsExportHovered] = useState(false);
     const itemsPerPage = 15;
@@ -36,7 +37,7 @@ export default function DaftarAntreanPage() {
             const clusterData = data.doctors.map((d) => ({
                 cluster: d.cluster,
                 doctorName: d.nama,
-            }));
+            })).sort((a, b) => a.cluster - b.cluster);
 
             setClusters(clusterData);
         } catch (error) {
@@ -44,8 +45,15 @@ export default function DaftarAntreanPage() {
         }
     };
 
+    const getUserData = () => {
+        const data = localStorage.getItem("user");
+        if (!data) throw new Error("Gagal ambil pengguna");
+        setUserData(JSON.parse(data));
+    };
+
     useEffect(() => {
         fetchData();
+        getUserData();
     }, []);
 
     const clusterCountsMap: Record<number, number> = queueData.reduce(
@@ -120,6 +128,28 @@ export default function DaftarAntreanPage() {
 
         showToast("Data antrean berhasil diekspor", "success");
     }, [queueData]);
+
+    const handleSelesai = useCallback(async (id: number) => {
+        try {
+            const res = await fetch(`/api/antrean/${id}/hapus`, {
+                method: "DELETE",
+                body: JSON.stringify({
+                    role: userData.role
+                })
+            });
+            const result = await res.json();
+
+            fetchData();
+
+            if (result?.nomorDisplay) {
+                showToast(`Nomor ${result.nomorDisplay} dihapus`, "success");
+            } else {
+                showToast("Antrean dihapus", "success");
+            }
+        } catch (error) {
+            showToast(error.message || "Gagal menghapus antrean", "error");
+        }
+    }, [userData]);
 
     const getStatusColor = useCallback(
         (status: string) => {
@@ -421,6 +451,16 @@ export default function DaftarAntreanPage() {
                                         >
                                             Status
                                         </th>
+                                        <th
+                                            className="text-center px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            style={{
+                                                color: isDark
+                                                    ? "#9CA3AF"
+                                                    : "#6B7280",
+                                            }}
+                                        >
+                                            Aksi
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -482,6 +522,34 @@ export default function DaftarAntreanPage() {
                                                 >
                                                     {item.status}
                                                 </span>
+                                            </td>
+                                            <td className="px-6 py-4 align-middle">
+                                                <div className="flex items-center justify-center gap-1 flex-wrap">
+                                                    <button
+                                                        onClick={() => handleSelesai(item.id)}
+                                                        className="px-6 py-2 cursor-pointer rounded-lg text-xs font-medium"
+                                                        style={{
+                                                            backgroundColor:
+                                                                isDark
+                                                                    ? "#7F1D1D"
+                                                                    : "#FEE2E2",
+                                                            color: isDark
+                                                                ? "#FCA5A5"
+                                                                : "#DC2626",
+                                                            border: isDark
+                                                                ? "1px solid #991B1B"
+                                                                : "1px solid #DC2626",
+                                                            opacity: item.status === "Selesai"
+                                                                ? "100%"
+                                                                : "50%",
+                                                            pointerEvents: item.status === "Selesai"
+                                                                ? "auto"
+                                                                : "none"
+                                                        }}
+                                                    >
+                                                        Hapus
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
