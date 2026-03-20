@@ -143,14 +143,13 @@ export default function DaftarAntreanPage() {
 
     const handlePanggil = useCallback(async (id: number) => {
         try {
-            const res = await fetch(`/api/antrean/${id}/panggil`, {
+            const res = await fetch(`/api/antrean/${id}/${"Dipanggil"}`, {
                 method: "PUT",
                 body: JSON.stringify({
                     role: userData.role
                 })
             });
             const result = await res.json();
-
             fetchData(userData);
 
             if (result?.nomorDisplay) {                
@@ -166,14 +165,13 @@ export default function DaftarAntreanPage() {
 
     const handleLewati = useCallback(async (id: number) => {
         try {
-            const res = await fetch(`/api/antrean/${id}/lewati`, {
+            const res = await fetch(`/api/antrean/${id}/${"Menunggu"}`, {
                 method: "PUT",
                 body: JSON.stringify({
                     role: userData.role
                 })
             });
             const result = await res.json();
-
             fetchData(userData);
 
             if (result?.nomorDisplay) {
@@ -186,16 +184,36 @@ export default function DaftarAntreanPage() {
         }
     }, [userData]);
 
-    const handleSelesai = useCallback(async (id: number) => {
+    const handlePeriksa = useCallback(async (id: number) => {
         try {
-            const res = await fetch(`/api/antrean/${id}/selesai`, {
+            const res = await fetch(`/api/antrean/${id}/${"Sedang Diperiksa"}`, {
                 method: "PUT",
                 body: JSON.stringify({
                     role: userData.role
                 })
             });
             const result = await res.json();
+            fetchData(userData);
 
+            if (result?.nomorDisplay) {
+                showToast(`Nomor ${result.nomorDisplay} selesai`, "success");
+            } else {
+                showToast("Antrean selesai", "success");
+            }
+        } catch (error) {
+            showToast(error.message || "Gagal menyelesaikan antrean", "error");
+        }
+    }, [userData]);
+
+    const handleSelesai = useCallback(async (id: number) => {
+        try {
+            const res = await fetch(`/api/antrean/${id}/${"Selesai"}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    role: userData.role
+                })
+            });
+            const result = await res.json();
             fetchData(userData);
 
             if (result?.nomorDisplay) {
@@ -459,7 +477,7 @@ export default function DaftarAntreanPage() {
                         }}
                     >
                         <div className="overflow-x-auto">
-                            <table className="w-full">
+                            <table className="w-full table-fixed">
                                 <thead
                                     style={{
                                         backgroundColor: isDark
@@ -515,7 +533,7 @@ export default function DaftarAntreanPage() {
                                             Status
                                         </th>
                                         <th
-                                            className="text-center px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center px-6 py-4 whitespace-nowrap text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -587,7 +605,7 @@ export default function DaftarAntreanPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 align-middle">
-                                                <div className="flex items-center justify-center gap-1 flex-wrap">
+                                                <div className="flex items-center justify-center gap-1 flex-wrap max-w-100">
                                                     <button
                                                         onClick={() =>
                                                             handlePanggil(
@@ -616,7 +634,7 @@ export default function DaftarAntreanPage() {
                                                                 item.id,
                                                             )
                                                         }
-                                                        className="px-3 py-2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                        className="px-3 py-2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-"
                                                         style={{
                                                             backgroundColor:
                                                                 isDark
@@ -634,11 +652,32 @@ export default function DaftarAntreanPage() {
                                                     </button>
                                                     <button
                                                         onClick={() =>
+                                                            handlePeriksa(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className="px-3 py-2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-"
+                                                        style={{
+                                                            backgroundColor: isDark
+                                                                ? "#78350F"
+                                                                : "#FEF3C7",
+                                                            color: isDark
+                                                                ? "#FCD34D"
+                                                                : "#92400E",
+                                                            border: isDark
+                                                                ? "1px solid #D97706"
+                                                                : "1px solid #F59E0B",
+                                                        }}
+                                                    >
+                                                        Periksa
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
                                                             handleSelesai(
                                                                 item.id,
                                                             )
                                                         }
-                                                        className="px-3 py-2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                        className="px-3 py-2 cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-"
                                                         style={{
                                                             backgroundColor:
                                                                 isDark
