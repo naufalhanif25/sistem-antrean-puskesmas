@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { subscribe, removeToast } from "@/lib/toast";
+import type { Toast } from "@/lib/toast";
 
 export default function ToastContainer() {
-    const [toasts, setToasts] = useState<any[]>([]);
+    const [toasts, setToasts] = useState<Toast[]>([]);
 
     useEffect(() => {
         return subscribe(setToasts);
@@ -23,7 +24,6 @@ export default function ToastContainer() {
                             toast.type === "success" ? "#10B981" : "#EF4444",
                     }}
                 >
-                    {/* isi */}
                     <div className="p-4 flex justify-between items-start">
                         <p
                             className="text-sm font-medium"
@@ -36,7 +36,6 @@ export default function ToastContainer() {
                         >
                             {toast.message}
                         </p>
-
                         <button
                             onClick={() => removeToast(toast.id)}
                             className="ml-3 text-xs"
@@ -44,8 +43,6 @@ export default function ToastContainer() {
                             ✕
                         </button>
                     </div>
-
-                    {/* progress bar */}
                     <div className="h-1 w-full bg-gray-200">
                         <div
                             className="h-1"
@@ -61,7 +58,6 @@ export default function ToastContainer() {
                     </div>
                 </div>
             ))}
-
             <style jsx>{`
                 @keyframes grow {
                     from {
