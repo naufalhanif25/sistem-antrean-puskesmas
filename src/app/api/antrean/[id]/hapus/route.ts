@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { formatNomorDisplay } from "@/lib/antrean";
 
-export async function PUT(
+export async function DELETE(
     req: Request,
     context: { params: Promise<{ id: string }> },
 ) {
@@ -12,7 +12,7 @@ export async function PUT(
         const { role } = body;
         const parsedId = parseInt(id);
 
-        if (role !== "DOKTER") {
+        if (role !== "ADMIN") {
             return NextResponse.json(
                 { message: "Role tidak valid" },
                 { status: 400 },
@@ -34,11 +34,8 @@ export async function PUT(
                 { status: 404 },
             );
         }
-        await prisma.antrean.update({
+        await prisma.antrean.delete({
             where: { id: parsedId },
-            data: {
-                status: "Selesai",
-            },
         });
 
         const nomorDisplay = formatNomorDisplay(
@@ -47,12 +44,12 @@ export async function PUT(
         );
 
         return NextResponse.json({
-            message: "Berhasil selesai",
-            nomorDisplay,
+            message: "Data berhasil dihapus",
+            nomorDisplay
         });
     } catch (error) {
         return NextResponse.json(
-            { message: "Gagal selesai", error: String(error) },
+            { message: "Gagal menghapus antrean", error: String(error) },
             { status: 500 },
         );
     }

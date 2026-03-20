@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { formatNomorDisplay } from "@/lib/antrean";
+import { QueueStatus } from "@/app/props/UserData";
 
 export async function PUT(
     req: Request,
-    context: { params: Promise<{ id: string }> },
+    context: { params: Promise<{ id: string, status: QueueStatus }> },
 ) {
     try {
-        const { id } = await context.params;
+        const { id, status } = await context.params;
         const body = await req.json();
         const { role } = body;
         const parsedId = parseInt(id);
@@ -37,7 +38,7 @@ export async function PUT(
         await prisma.antrean.update({
             where: { id: parsedId },
             data: {
-                status: "Dipanggil",
+                status,
             },
         });
 
@@ -47,12 +48,12 @@ export async function PUT(
         );
 
         return NextResponse.json({
-            message: "Berhasil panggil",
+            message: "Berhasil mengubah status",
             nomorDisplay,
         });
     } catch (error) {
         return NextResponse.json(
-            { message: "Internal server error", error: String(error) },
+            { message: "Gagal mengubah status", error: String(error) },
             { status: 500 },
         );
     }

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import prisma from "@/lib/prisma";
+import { UserRole } from "@/app/props/UserData";
 
 export async function POST(req: Request) {
     try {
@@ -20,7 +21,7 @@ export async function POST(req: Request) {
             );
         }
 
-        const validRoles = ["ADMIN", "DOKTER", "LAYAR"];
+        const validRoles: UserRole[] = ["ADMIN", "DOKTER", "LAYAR"];
         
         if (!validRoles.includes(role)) {
             return NextResponse.json(
