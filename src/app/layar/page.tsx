@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { QueueStatus } from "../props/UserData";
 import Image from "next/image";
 
 interface QueueItem {
     id: number;
     queueNumber: string;
     patientName: string;
-    status: "Dipanggil" | "Menunggu" | "Sedang Diperiksa" | "Selesai";
+    status: QueueStatus;
     cluster: number;
 }
 
