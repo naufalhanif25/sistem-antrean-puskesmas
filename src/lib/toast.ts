@@ -1,6 +1,6 @@
-type ToastType = "success" | "error";
+export type ToastType = "success" | "error";
 
-type Toast = {
+export type Toast = {
     id: number;
     message: string;
     type: ToastType;
@@ -23,9 +23,9 @@ function notify() {
 }
 
 export function showToast(message: string, type: ToastType = "success") {
-    const id = Date.now();
-
+    const id = Date.now() + Math.floor(Math.random() * 1000);
     const newToast = { id, message, type };
+
     toasts = [...toasts, newToast];
     notify();
 
