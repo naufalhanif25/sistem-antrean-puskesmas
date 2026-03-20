@@ -8,3 +8,10 @@ export interface UserData {
     nip: string;
     role: UserRole;
 };
+
+export const statusOrder: Record<QueueStatus, number> = {
+    "Sedang Diperiksa": 1,
+    "Dipanggil": 2,
+    "Menunggu": 3,
+    "Selesai": 4,
+};
