@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import Sidebar from "@/app/components/Sidebar";
+import { AdminSidebarItems } from "@/app/data/sidebar";
 import { showToast } from "@/lib/toast";
+import Popup from "@/app/components/Popup";
 
 export default function PendaftaranPage() {
     const [isDark, setIsDark] = useState(false);
@@ -13,6 +15,7 @@ export default function PendaftaranPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isBatalPressed, setIsBatalPressed] = useState(false);
     const [isAntreanPressed, setIsAntreanPressed] = useState(false);
+    const [showPopup, setShowPopup] = useState<boolean>(false);
 
     const handleReset = () => {
         setNik("");
@@ -21,8 +24,7 @@ export default function PendaftaranPage() {
         setKodeRuangan("");
     };
 
-    const handleSubmitAntrean = async (e: React.SubmitEvent) => {
-        e.preventDefault();
+    const handleSubmitAntrean = async () => {
         setIsLoading(true);
 
         try {
@@ -43,9 +45,10 @@ export default function PendaftaranPage() {
             if (!res.ok) {
                 showToast(data.message || "Gagal tambah antrean", "error");
             }
-            showToast("Antrean berhasil ditambahkan", "success");
+            else {
+                showToast("Antrean berhasil ditambahkan", "success");
+            }
             handleReset();
-            showToast(`Nomor antrean: ${data.nomorDisplay}`, "success");
         } catch (error) {
             showToast(error.message || "Terjadi kesalahan", "error");
         } finally {
@@ -55,7 +58,20 @@ export default function PendaftaranPage() {
 
     return (
         <div className="flex h-screen">
-            <Sidebar isDark={isDark} />
+            <Sidebar isDark={isDark} items={AdminSidebarItems} />
+            <Popup 
+                title="Cetak struk pasien?" 
+                description="Apakah Anda ingin mencetak struk pasien yang berisi nama pasien, nomor antrean, dan informasi penting lainnya?" 
+                show={showPopup}
+                yesButtonCallback={async () => {
+                    await handleSubmitAntrean();
+                    setShowPopup(false);
+                }}
+                noButtonCallback={async () => {
+                    await handleSubmitAntrean();
+                    setShowPopup(false);
+                }}
+            />
             <div
                 className="flex-1 overflow-y-auto transition-colors duration-300"
                 style={{
@@ -157,7 +173,10 @@ export default function PendaftaranPage() {
                                 Tambah Antrean
                             </h2>
                             <form
-                                onSubmit={handleSubmitAntrean}
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    setShowPopup(true);
+                                }}
                                 className="space-y-5"
                             >
                                 <div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/app/components/Sidebar";
+import { AdminSidebarItems } from "@/app/data/sidebar";
 import { useState, useCallback } from "react";
 import { useEffect } from "react";
 import { showToast } from "@/lib/toast";
@@ -29,7 +30,7 @@ export default function DaftarAntreanPage() {
     const fetchData = async () => {
         try {
             const res = await fetch("/api/antrean");
-            if (!res.ok) throw new Error("Gagal ambil data");
+            if (!res.ok) throw new Error("Gagal mengambil data");
             const data = await res.json();
 
             setQueueData(data.queue || []);
@@ -41,13 +42,13 @@ export default function DaftarAntreanPage() {
 
             setClusters(clusterData);
         } catch (error) {
-            showToast(error.message || "Gagal ambil data antrean", "error");
+            showToast(error.message || "Gagal mengambil data antrean", "error");
         }
     };
 
     const getUserData = () => {
         const data = localStorage.getItem("user");
-        if (!data) throw new Error("Gagal ambil pengguna");
+        if (!data) throw new Error("Gagal mengambil pengguna");
         setUserData(JSON.parse(data));
     };
 
@@ -189,7 +190,7 @@ export default function DaftarAntreanPage() {
 
     return (
         <div className="flex h-screen">
-            <Sidebar isDark={isDark} />
+            <Sidebar isDark={isDark} items={AdminSidebarItems} />
             <div
                 className="flex-1 overflow-y-auto transition-colors duration-300"
                 style={{
@@ -396,7 +397,7 @@ export default function DaftarAntreanPage() {
                         }}
                     >
                         <div className="overflow-x-auto">
-                            <table className="w-full">
+                            <table className="w-full table-fixed">
                                 <thead
                                     style={{
                                         backgroundColor: isDark
@@ -412,7 +413,7 @@ export default function DaftarAntreanPage() {
                                         }}
                                     >
                                         <th
-                                            className="text-center px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-30 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -422,7 +423,7 @@ export default function DaftarAntreanPage() {
                                             No
                                         </th>
                                         <th
-                                            className="text-center px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-50 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -432,7 +433,7 @@ export default function DaftarAntreanPage() {
                                             Nomor Antrean
                                         </th>
                                         <th
-                                            className="text-center px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-120 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -442,7 +443,7 @@ export default function DaftarAntreanPage() {
                                             Nama Pasien
                                         </th>
                                         <th
-                                            className="text-center px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-50 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -452,7 +453,7 @@ export default function DaftarAntreanPage() {
                                             Status
                                         </th>
                                         <th
-                                            className="text-center px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-50 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -509,7 +510,7 @@ export default function DaftarAntreanPage() {
                                             </td>
                                             <td className="px-2 py-4 text-center align-middle">
                                                 <span
-                                                    className="px-3 py-2 rounded-lg text-sm font-medium inline-block transition-colors duration-300"
+                                                    className="px-3 py-2 rounded-lg text-sm text-nowrap font-medium inline-block transition-colors duration-300"
                                                     style={{
                                                         backgroundColor:
                                                             getStatusColor(
