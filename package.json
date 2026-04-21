@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:studio": "npx prisma studio",
+    "db:seed": "npx prisma db seed",
+    "db:pull": "npx prisma db pull",
+    "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev",
+    "db:deploy": "npx prisma migrate deploy",
+    "db:reset": "npx prisma migrate reset"
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
@@ -15,7 +22,6 @@
     "@prisma/client": "^6.19.1",
     "@shadcn/ui": "^0.0.4",
     "axios": "^1.13.2",
-    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.4.0",
     "jose": "^6.2.2",
