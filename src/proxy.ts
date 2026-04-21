@@ -8,7 +8,7 @@ export async function proxy(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
     const url = req.nextUrl;
 
-    if (url.pathname === "/" || url.pathname === "/daftar") {
+    if (url.pathname === "/") {
         if (!token) return;
         try {
             const { payload } = await jwtVerify(token, secret);
@@ -51,6 +51,8 @@ export async function proxy(req: NextRequest) {
 
             if (payload.role !== "DOKTER") {
                 return NextResponse.redirect(new URL("/", req.url));
+            } else if (url.pathname == "/dokter") {
+                return NextResponse.redirect(new URL("/dokter/antrean", req.url));
             }
         } catch {
             return NextResponse.redirect(new URL("/", req.url));
@@ -75,7 +77,7 @@ export async function proxy(req: NextRequest) {
 
 export const config = {
     matcher: [
-        "/", "/daftar",
+        "/",
         "/admin", "/admin/:path*", 
         "/dokter", "/dokter/:path*",
         "/layar"
