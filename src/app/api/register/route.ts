@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { UserRole } from "@/app/props/UserData";
+import { isAllNumber } from "@/lib/validator";
 
 export async function POST(req: Request) {
     try {
@@ -14,9 +15,15 @@ export async function POST(req: Request) {
                 { status: 400 },
             );
         }
-        if (password.length < 6) {
+        if (nip.length < 18 || !isAllNumber(nip)) {
             return NextResponse.json(
-                { error: "Password minimal 6 karakter" },
+                { message: "NIP tidak valid" },
+                { status: 400 },
+            );
+        }
+        if (password.length < 8) {
+            return NextResponse.json(
+                { error: "Password minimal 8 karakter" },
                 { status: 400 },
             );
         }

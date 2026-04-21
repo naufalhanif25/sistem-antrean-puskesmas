@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { formatNomorDisplay } from "@/lib/antrean";
-import { statusOrder } from "@/app/props/UserData";
+import { statusOrder } from "@/app/data/StatusOrder";
+import { isAllNumber } from "@/lib/validator";
 
 export async function POST(req: Request) {
     try {
@@ -14,6 +15,16 @@ export async function POST(req: Request) {
                 { status: 400 },
             );
         }
+        if (nik.length < 16 || !isAllNumber(nik)) {
+            return NextResponse.json(
+                { message: "NIK tidak valid" },
+                { status: 400 },
+            );
+        }
+        const existing = await prisma.antrean.findFirst({
+            where: { nik },
+        });
+
         const counter = await prisma.counter.upsert({
             where: { kodeRuangan },
             update: {
@@ -26,20 +37,35 @@ export async function POST(req: Request) {
         });
         const nextNumber = counter.lastNumber;
 
-        await prisma.antrean.create({
-            data: {
-                nik,
-                namaLengkap,
-                jenisKelamin,
-                kodeRuangan,
-                nomorAntrean: nextNumber,
-            },
-        });
+        if (existing) {
+            await prisma.antrean.update({
+                where: { id: existing.id },
+                data: {
+                    namaLengkap,
+                    jenisKelamin,
+                    kodeRuangan,
+                    nomorAntrean: nextNumber,
+                },
+            });
+        } 
+        else {
+            await prisma.antrean.create({
+                data: {
+                    nik,
+                    namaLengkap,
+                    jenisKelamin,
+                    kodeRuangan,
+                    nomorAntrean: nextNumber,
+                },
+            });
+        }
 
         const nomorDisplay = formatNomorDisplay(kodeRuangan, nextNumber);
 
         return NextResponse.json({
-            message: "Berhasil tambah antrean",
+            message: existing
+                ? "Data antrean berhasil diperbarui"
+                : "Berhasil menambah antrean",
             nomorAntrean: nextNumber,
             nomorDisplay,
         });
@@ -64,30 +90,35 @@ export async function GET() {
                 cluster: true,
             },
         });
-        const queueData = queue.map((item) => ({
-            id: item.id,
-            queueNumber: formatNomorDisplay(
-                item.kodeRuangan,
-                item.nomorAntrean,
-            ),
-            patientName: item.namaLengkap,
-            status: item.status,
-            cluster: item.kodeRuangan,
-            createdAt: item.createdAt,
-        })).sort((a, b) => {
-            const statusA = statusOrder[a.status] || 999;
-            const statusB = statusOrder[b.status] || 999;
+        const queueData = queue
+            .map((item) => ({
+                id: item.id,
+                queueNumber: formatNomorDisplay(
+                    item.kodeRuangan,
+                    item.nomorAntrean,
+                ),
+                patientName: item.namaLengkap,
+                status: item.status,
+                cluster: item.kodeRuangan,
+                createdAt: item.createdAt,
+            }))
+            .sort((a, b) => {
+                const statusA = statusOrder[a.status] || 999;
+                const statusB = statusOrder[b.status] || 999;
 
-            if (statusA !== statusB) {
-                return statusA - statusB;
-            }
-            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-        });
+                if (statusA !== statusB) {
+                    return statusA - statusB;
+                }
+                return (
+                    new Date(a.createdAt).getTime() -
+                    new Date(b.createdAt).getTime()
+                );
+            });
 
         return NextResponse.json({ queue: queueData, doctors });
     } catch (error) {
         return NextResponse.json(
-            { message: "Gagal ambil data", error: String(error) },
+            { message: "Gagal mengambil data", error: String(error) },
             { status: 500 },
         );
     }

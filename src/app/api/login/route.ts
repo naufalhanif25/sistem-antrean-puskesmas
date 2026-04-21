@@ -1,11 +1,32 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { isAllNumber } from "@/lib/validator";
 
 export async function POST(req: Request) {
     try {
         const { nip, password, role } = await req.json();
+
+        if (!nip || !password || !role) {
+            return NextResponse.json(
+                { message: "Data tidak lengkap" },
+                { status: 400 },
+            );
+        }
+        if (nip.length < 18 || !isAllNumber(nip)) {
+            return NextResponse.json(
+                { message: "NIP tidak valid" },
+                { status: 400 },
+            );
+        }
+        if (password.length < 8) {
+            return NextResponse.json(
+                { message: "Password tidak valid" },
+                { status: 400 },
+            );
+        }
+
         const user = await prisma.user.findUnique({
             where: { nip },
         });

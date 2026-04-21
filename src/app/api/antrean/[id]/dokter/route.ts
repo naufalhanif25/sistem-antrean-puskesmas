@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { formatNomorDisplay } from "@/lib/antrean";
-import { statusOrder } from "@/app/props/UserData";
+import { statusOrder } from "@/app/data/StatusOrder";
 
 export async function GET(
     req: Request, 
@@ -38,7 +38,7 @@ export async function GET(
         return NextResponse.json({ queue: queueData });
     } catch (error) {
         return NextResponse.json(
-            { message: "Gagal ambil data", error: String(error) },
+            { message: "Gagal mengambil data", error: String(error) },
             { status: 500 },
         );
     }
