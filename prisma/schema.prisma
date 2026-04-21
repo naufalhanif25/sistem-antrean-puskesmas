@@ -1,48 +1,42 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-    provider = "prisma-client-js"
-    output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-    id       Int    @id @default(autoincrement())
-    nip      String @unique
-    nama     String?
-    password String
-    role     Role
-    cluster  Int?
-}
-
-enum Role {
-    ADMIN
-    DOKTER
-    LAYAR
+  id       Int     @id @default(autoincrement())
+  nip      String  @unique
+  password String
+  role     Role
+  cluster  Int?
+  nama     String?
 }
 
 model Antrean {
-    id              Int      @id @default(autoincrement())
-    nik             String   @unique
-    namaLengkap     String
-    jenisKelamin    String
-    kodeRuangan     String
-    nomorAntrean    Int
-    status          String   @default("Menunggu")
-    createdAt       DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  nik          String   @unique
+  namaLengkap  String
+  jenisKelamin String
+  kodeRuangan  String
+  nomorAntrean Int
+  createdAt    DateTime @default(now())
+  status       String   @default("Menunggu")
 }
 
 model Counter {
-    id           Int    @id @default(autoincrement())
-    kodeRuangan  String @unique
-    lastNumber   Int
+  id          Int    @id @default(autoincrement())
+  kodeRuangan String @unique
+  lastNumber  Int
+}
+
+enum Role {
+  ADMIN
+  DOKTER
+  LAYAR
 }

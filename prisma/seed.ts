@@ -1,15 +1,14 @@
-import { PrismaClient } from "../src/generated/prisma";
-// import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcrypt";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
     await prisma.user.upsert({
-        where: { nip: "admin001" },
+        where: { nip: process.env.ADMIN_NIP },
         update: {},
         create: {
-            nip: "admin001",
+            nip: process.env.ADMIN_NIP,
             nama: "Admin",
             password: await bcrypt.hash(process.env.ADMIN_PW, 10),
             role: "ADMIN",
@@ -17,10 +16,10 @@ async function main() {
         },
     });
     await prisma.user.upsert({
-        where: { nip: "layar001" },
+        where: { nip: process.env.LAYAR_NIP },
         update: {},
         create: {
-            nip: "layar001",
+            nip: process.env.LAYAR_NIP,
             nama: "Layar",
             password: await bcrypt.hash(process.env.LAYAR_PW, 10),
             role: "LAYAR",
