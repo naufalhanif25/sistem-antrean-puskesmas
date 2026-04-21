@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import Sidebar from "@/app/components/Sidebar";
+import { AdminSidebarItems } from "@/app/data/sidebar";
+import { showToast } from "@/lib/toast";
+import Popup from "@/app/components/Popup";
 
 export default function PendaftaranPage() {
     const [isDark, setIsDark] = useState(false);
@@ -12,6 +15,7 @@ export default function PendaftaranPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isBatalPressed, setIsBatalPressed] = useState(false);
     const [isAntreanPressed, setIsAntreanPressed] = useState(false);
+    const [showPopup, setShowPopup] = useState<boolean>(false);
 
     const handleReset = () => {
         setNik("");
@@ -20,25 +24,54 @@ export default function PendaftaranPage() {
         setKodeRuangan("");
     };
 
-    const handleSubmitAntrean = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmitAntrean = async () => {
         setIsLoading(true);
 
         try {
-            // TODO: Logika tambah antrean sesuai dengan API
-            // TODO: Tambahkan juga logika untuk mencetak struk
-        } 
-        catch (error) {
-            console.error(error);
-        } 
-        finally {
+            const res = await fetch("/api/antrean", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    nik,
+                    namaLengkap,
+                    jenisKelamin,
+                    kodeRuangan,
+                }),
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                showToast(data.message || "Gagal tambah antrean", "error");
+            }
+            else {
+                showToast("Antrean berhasil ditambahkan", "success");
+            }
+            handleReset();
+        } catch (error) {
+            showToast(error.message || "Terjadi kesalahan", "error");
+        } finally {
             setIsLoading(false);
         }
     };
 
     return (
         <div className="flex h-screen">
-            <Sidebar isDark={isDark} />
+            <Sidebar isDark={isDark} items={AdminSidebarItems} />
+            <Popup 
+                title="Cetak struk pasien?" 
+                description="Apakah Anda ingin mencetak struk pasien yang berisi nama pasien, nomor antrean, dan informasi penting lainnya?" 
+                show={showPopup}
+                yesButtonCallback={async () => {
+                    await handleSubmitAntrean();
+                    setShowPopup(false);
+                }}
+                noButtonCallback={async () => {
+                    await handleSubmitAntrean();
+                    setShowPopup(false);
+                }}
+            />
             <div
                 className="flex-1 overflow-y-auto transition-colors duration-300"
                 style={{
@@ -139,7 +172,13 @@ export default function PendaftaranPage() {
                             >
                                 Tambah Antrean
                             </h2>
-                            <form onSubmit={handleSubmitAntrean} className="space-y-5">
+                            <form
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    setShowPopup(true);
+                                }}
+                                className="space-y-5"
+                            >
                                 <div>
                                     <label
                                         className="block mb-2 text-sm font-medium transition-colors duration-300"
@@ -295,7 +334,6 @@ export default function PendaftaranPage() {
                                             paddingRight: "2.5rem",
                                         }}
                                     >
-                                        {/* FIXME: Sesuaikan dengan daftar cluster dari API */}
                                         <option value="" disabled>
                                             Kode Ruangan
                                         </option>

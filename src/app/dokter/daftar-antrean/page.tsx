@@ -1,72 +1,46 @@
 "use client";
 
-import Sidebar from "@/app/components/Sidebar";
-import { AdminSidebarItems } from "@/app/data/sidebar";
 import { useState, useCallback } from "react";
 import { useEffect } from "react";
 import { showToast } from "@/lib/toast";
-import { QueueStatus, UserData } from "@/app/props/UserData";
-
-interface QueueItem {
-    id: number;
-    queueNumber: string;
-    patientName: string;
-    status: QueueStatus;
-    cluster: string;
-}
+import { UserData, QueueItem } from "../../props/UserData";
+import Sidebar from "@/app/components/Sidebar";
+import { DokterSidebarItems } from "@/app/data/sidebar";
 
 export default function DaftarAntreanPage() {
     const [isDark, setIsDark] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [userData, setUserData] = useState<UserData | null>(null);
     const [isRefreshHovered, setIsRefreshHovered] = useState(false);
     const [isExportHovered, setIsExportHovered] = useState(false);
     const itemsPerPage = 15;
+    const [userData, setUserData] = useState<UserData | null>(null);
     const [queueData, setQueueData] = useState<QueueItem[]>([]);
-    const [clusters, setClusters] = useState<
-        { cluster: number; doctorName: string }[]
-    >([]);
 
-    const fetchData = async () => {
+    const fetchData = async (currentData: UserData | null) => {
         try {
-            const res = await fetch("/api/antrean");
-            if (!res.ok) throw new Error("Gagal mengambil data");
+            const res = await fetch(`/api/antrean/${currentData?.cluster || 1}/dokter`);
+            if (!res.ok) throw new Error("Gagal ambil data");
             const data = await res.json();
 
             setQueueData(data.queue || []);
-            
-            const clusterData = data.doctors.map((d) => ({
-                cluster: d.cluster,
-                doctorName: d.nama,
-            })).sort((a, b) => a.cluster - b.cluster);
-
-            setClusters(clusterData);
         } catch (error) {
-            showToast(error.message || "Gagal mengambil data antrean", "error");
+            showToast(error.message || "Gagal ambil data antrean", "error");
         }
     };
 
     const getUserData = () => {
         const data = localStorage.getItem("user");
-        if (!data) throw new Error("Gagal mengambil pengguna");
+        if (!data) throw new Error("Gagal ambil pengguna");
         setUserData(JSON.parse(data));
     };
 
     useEffect(() => {
-        fetchData();
         getUserData();
     }, []);
 
-    const clusterCountsMap: Record<number, number> = queueData.reduce(
-        (acc, item) => {
-            if (item.status !== "Selesai") {
-                const clusterNumber = Number(item.cluster.substring(7));
-                acc[clusterNumber] = (acc[clusterNumber] || 0) + 1;
-            }
-            return acc;
-        },
-        {} as Record<number, number>,
-    );
+    useEffect(() => {
+        fetchData(userData);
+    }, [userData]);
 
     const totalPages = Math.ceil(queueData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
@@ -74,9 +48,9 @@ export default function DaftarAntreanPage() {
     const currentData = queueData.slice(startIndex, endIndex);
 
     const handleRefresh = useCallback(() => {
-        fetchData();
+        fetchData(userData);
         showToast("Data berhasil direfresh");
-    }, []);
+    }, [userData]);
 
     const handleExportCSV = useCallback(() => {
         if (!queueData.length) {
@@ -130,25 +104,94 @@ export default function DaftarAntreanPage() {
         showToast("Data antrean berhasil diekspor", "success");
     }, [queueData]);
 
-    const handleSelesai = useCallback(async (id: number) => {
+    const speechGenerator = (text: string) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "id-ID";
+        speechSynthesis.speak(utterance);
+    };
+
+    const handlePanggil = useCallback(async (id: number) => {
         try {
-            const res = await fetch(`/api/antrean/${id}/hapus`, {
-                method: "DELETE",
+            const res = await fetch(`/api/antrean/${id}/${"Dipanggil"}`, {
+                method: "PUT",
                 body: JSON.stringify({
                     role: userData.role
                 })
             });
             const result = await res.json();
+            fetchData(userData);
 
-            fetchData();
-
-            if (result?.nomorDisplay) {
-                showToast(`Nomor ${result.nomorDisplay} dihapus`, "success");
+            if (result?.nomorDisplay) {                
+                speechGenerator(`Nomor antrean ${result.nomorDisplay}`);
+                showToast(`Memanggil nomor ${result.nomorDisplay}`, "success");
             } else {
-                showToast("Antrean dihapus", "success");
+                showToast("Berhasil memanggil antrean", "success");
             }
         } catch (error) {
-            showToast(error.message || "Gagal menghapus antrean", "error");
+            showToast(error.message || "Terjadi kesalahan", "error");
+        }
+    }, [userData]);
+
+    const handleLewati = useCallback(async (id: number) => {
+        try {
+            const res = await fetch(`/api/antrean/${id}/${"Menunggu"}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    role: userData.role
+                })
+            });
+            const result = await res.json();
+            fetchData(userData);
+
+            if (result?.nomorDisplay) {
+                showToast(`Nomor ${result.nomorDisplay} dilewati`, "success");
+            } else {
+                showToast("Antrean dilewati", "success");
+            }
+        } catch (error) {
+            showToast(error.message || "Gagal lewati antrean", "error");
+        }
+    }, [userData]);
+
+    const handlePeriksa = useCallback(async (id: number) => {
+        try {
+            const res = await fetch(`/api/antrean/${id}/${"Sedang Diperiksa"}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    role: userData.role
+                })
+            });
+            const result = await res.json();
+            fetchData(userData);
+
+            if (result?.nomorDisplay) {
+                showToast(`Nomor ${result.nomorDisplay} selesai`, "success");
+            } else {
+                showToast("Antrean selesai", "success");
+            }
+        } catch (error) {
+            showToast(error.message || "Gagal menyelesaikan antrean", "error");
+        }
+    }, [userData]);
+
+    const handleSelesai = useCallback(async (id: number) => {
+        try {
+            const res = await fetch(`/api/antrean/${id}/${"Selesai"}`, {
+                method: "PUT",
+                body: JSON.stringify({
+                    role: userData.role
+                })
+            });
+            const result = await res.json();
+            fetchData(userData);
+
+            if (result?.nomorDisplay) {
+                showToast(`Nomor ${result.nomorDisplay} selesai`, "success");
+            } else {
+                showToast("Antrean selesai", "success");
+            }
+        } catch (error) {
+            showToast(error.message || "Gagal menyelesaikan antrean", "error");
         }
     }, [userData]);
 
@@ -190,7 +233,7 @@ export default function DaftarAntreanPage() {
 
     return (
         <div className="flex h-screen">
-            <Sidebar isDark={isDark} items={AdminSidebarItems} />
+            <Sidebar isDark={isDark} items={DokterSidebarItems} title="Panel Dokter" />
             <div
                 className="flex-1 overflow-y-auto transition-colors duration-300"
                 style={{
@@ -330,63 +373,6 @@ export default function DaftarAntreanPage() {
                             memanggil atau melewati antrean.
                         </p>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        {clusters.map((c, index) => (
-                            <div
-                                key={index}
-                                className="rounded-xl p-5 transition-all duration-300"
-                                style={{
-                                    backgroundColor: isDark
-                                        ? "#1A1A1A"
-                                        : "#FFFFFF",
-                                    border: isDark
-                                        ? "1px solid #2A2A2A"
-                                        : "1px solid #E5E7EB",
-                                }}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex-1">
-                                        <p
-                                            className="text-xs uppercase tracking-wider mb-1 transition-colors duration-300"
-                                            style={{
-                                                color: isDark
-                                                    ? "#6B7280"
-                                                    : "#9CA3AF",
-                                            }}
-                                        >
-                                            Cluster {c.cluster}
-                                        </p>
-                                        <h3
-                                            className="text-base font-semibold transition-colors duration-300"
-                                            style={{
-                                                color: isDark
-                                                    ? "#FFFFFF"
-                                                    : "#111827",
-                                            }}
-                                        >
-                                            {c.doctorName}
-                                        </h3>
-                                    </div>
-                                    <div
-                                        className="w-14 h-14 rounded-lg flex items-center justify-center text-lg font-semibold transition-colors duration-300"
-                                        style={{
-                                            backgroundColor: isDark
-                                                ? "#0D0D0D"
-                                                : "#F9FAFB",
-                                            border: isDark
-                                                ? "1px solid #2A2A2A"
-                                                : "1px solid #E5E7EB",
-                                            color: isDark
-                                                ? "#E5E7EB"
-                                                : "#374151",
-                                        }}
-                                    >
-                                        {clusterCountsMap[c.cluster] || 0}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
                     <div
                         className="rounded-2xl overflow-hidden transition-all duration-300"
                         style={{
@@ -423,7 +409,7 @@ export default function DaftarAntreanPage() {
                                             No
                                         </th>
                                         <th
-                                            className="text-center w-50 px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-40 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -433,7 +419,7 @@ export default function DaftarAntreanPage() {
                                             Nomor Antrean
                                         </th>
                                         <th
-                                            className="text-center w-120 px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-80 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -443,7 +429,7 @@ export default function DaftarAntreanPage() {
                                             Nama Pasien
                                         </th>
                                         <th
-                                            className="text-center w-50 px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-40 px-6 py-4 text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -453,7 +439,7 @@ export default function DaftarAntreanPage() {
                                             Status
                                         </th>
                                         <th
-                                            className="text-center w-50 px-6 py-4 text-sm font-semibold transition-colors duration-300"
+                                            className="text-center w-110 px-6 py-4 whitespace-nowrap text-sm font-semibold transition-colors duration-300"
                                             style={{
                                                 color: isDark
                                                     ? "#9CA3AF"
@@ -510,7 +496,7 @@ export default function DaftarAntreanPage() {
                                             </td>
                                             <td className="px-2 py-4 text-center align-middle">
                                                 <span
-                                                    className="px-3 py-2 rounded-lg text-sm text-nowrap font-medium inline-block transition-colors duration-300"
+                                                    className="px-3 py-2 rounded-lg text-sm font-medium text-nowrap inline-block transition-colors duration-300"
                                                     style={{
                                                         backgroundColor:
                                                             getStatusColor(
@@ -525,10 +511,36 @@ export default function DaftarAntreanPage() {
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 align-middle">
-                                                <div className="flex items-center justify-center gap-1 flex-wrap">
+                                                <div className="flex items-center justify-center gap-1 flex-wrap max-w-100">
                                                     <button
-                                                        onClick={() => handleSelesai(item.id)}
-                                                        className="px-6 py-2 cursor-pointer rounded-lg text-xs font-medium"
+                                                        onClick={() =>
+                                                            handlePanggil(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className="px-3 py-2 max-w-[80px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                        style={{
+                                                            backgroundColor:
+                                                                isDark
+                                                                    ? "#065F46"
+                                                                    : "#D1FAE5",
+                                                            color: isDark
+                                                                ? "#6EE7B7"
+                                                                : "#065F46",
+                                                            border: isDark
+                                                                ? "1px solid #047857"
+                                                                : "1px solid #10B981",
+                                                        }}
+                                                    >
+                                                        Panggil
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleLewati(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className="px-3 py-2 max-w-[80px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
                                                         style={{
                                                             backgroundColor:
                                                                 isDark
@@ -540,15 +552,52 @@ export default function DaftarAntreanPage() {
                                                             border: isDark
                                                                 ? "1px solid #991B1B"
                                                                 : "1px solid #DC2626",
-                                                            opacity: item.status === "Selesai"
-                                                                ? "100%"
-                                                                : "50%",
-                                                            pointerEvents: item.status === "Selesai"
-                                                                ? "auto"
-                                                                : "none"
                                                         }}
                                                     >
-                                                        Hapus
+                                                        Lewati
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handlePeriksa(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className="px-3 py-2 max-w-[80px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                        style={{
+                                                            backgroundColor: isDark
+                                                                ? "#78350F"
+                                                                : "#FEF3C7",
+                                                            color: isDark
+                                                                ? "#FCD34D"
+                                                                : "#92400E",
+                                                            border: isDark
+                                                                ? "1px solid #D97706"
+                                                                : "1px solid #F59E0B",
+                                                        }}
+                                                    >
+                                                        Periksa
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleSelesai(
+                                                                item.id,
+                                                            )
+                                                        }
+                                                        className="px-3 py-2 max-w-[80px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                        style={{
+                                                            backgroundColor:
+                                                                isDark
+                                                                    ? "#1E40AF"
+                                                                    : "#DBEAFE",
+                                                            color: isDark
+                                                                ? "#93C5FD"
+                                                                : "#1E40AF",
+                                                            border: isDark
+                                                                ? "1px solid #1E3A8A"
+                                                                : "1px solid #93C5FD",
+                                                        }}
+                                                    >
+                                                        Selesai
                                                     </button>
                                                 </div>
                                             </td>

@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/app/components/Sidebar";
+import { AdminSidebarItems } from "@/app/data/sidebar";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -18,7 +19,7 @@ export default function LayarPage() {
 
     return (
         <div className="flex h-screen">
-            <Sidebar isDark={isDark} />
+            <Sidebar isDark={isDark} items={AdminSidebarItems} />
             <div
                 className="flex-1 min-h-screen w-full relative transition-colors duration-300 flex items-center justify-center overflow-y-auto"
                 style={{

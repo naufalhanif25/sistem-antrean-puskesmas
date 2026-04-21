@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-  ],
+, "middleware.js", "middleware.js", "prisma.config.bak", "prisma.config.bak", "next.config.mjs"  ],
   "exclude": ["node_modules"]
 }

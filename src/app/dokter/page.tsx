@@ -1,18 +1,26 @@
 "use client";
 
-// TODO: Lengkapi halaman dokter ini
-// TODO: Itegrasikan halaman dokter dengan API
-export default function DokterPage() {
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function AdminPage() {
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const res = await fetch("/api/me");
+
+            if (!res.ok) {
+                router.replace("/");
+            } else {
+                router.replace("/dokter/antrean");
+            }
+        };
+
+        checkAuth();
+    }, [router]);
+
     return (
-        <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-            <div className="text-center">
-                <h1 className="text-4xl font-bold text-white mb-4">
-                    Dokter Dashboard
-                </h1>
-                <p className="text-gray-400">
-                    Halaman dokter akan segera hadir
-                </p>
-            </div>
-        </div>
+        <div className="flex h-screen bg-white"></div>
     );
 }
