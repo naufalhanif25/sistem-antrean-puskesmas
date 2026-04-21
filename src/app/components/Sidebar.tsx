@@ -5,14 +5,16 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { showToast } from "@/lib/toast";
 import { UserData } from "../props/UserData";
-
+import type { SidebarItem } from "../data/sidebar";
 interface SidebarProps {
-    userEmail?: string;
-    userRole?: string;
+    items: SidebarItem[]
+    title?: string,
     isDark?: boolean;
 }
 
 export default function Sidebar({
+    title = "Panel Admin",
+    items,
     isDark = false,
 }: SidebarProps) {
     const pathname = usePathname();
@@ -54,88 +56,6 @@ export default function Sidebar({
         getUserData(setUserData);
     }, []);
 
-    const menuItems = [
-        {
-            icon: (
-                <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <line x1="19" y1="8" x2="19" y2="14" />
-                    <line x1="22" y1="11" x2="16" y2="11" />
-                </svg>
-            ),
-            label: "Pendaftaran",
-            href: "/admin/pendaftaran"
-        },
-        {
-            icon: (
-                <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 11h-6" />
-                    <path d="M19 8v6" />
-                </svg>
-            ),
-            label: "Daftar Antrean",
-            href: "/admin/daftar-antrean"
-        },
-        {
-            icon: (
-                <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M22 11h-6" />
-                    <path d="M19 8v6" />
-                </svg>
-            ),
-            label: "Registrasi Dokter",
-            href: "/admin/regis-dokter"
-        },
-        {
-            icon: (
-                <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                >
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
-                    <line x1="8" y1="21" x2="16" y2="21" />
-                    <line x1="12" y1="17" x2="12" y2="21" />
-                </svg>
-            ),
-            label: "Layar",
-            href: "/admin/layar"
-        },
-    ];
-
     return (
         <div
             className={`flex flex-col transition-all duration-300 ${
@@ -165,7 +85,7 @@ export default function Sidebar({
                                     color: isDark ? "#E5E7EB" : "#111827",
                                 }}
                             >
-                                Panel Admin
+                                {title}
                             </h1>
                             <p
                                 className="text-xs mt-1 transition-colors text-nowrap duration-300"
@@ -254,7 +174,7 @@ export default function Sidebar({
             )}
             <nav className="flex-1 overflow-y-auto px-4 pb-4">
                 <div className={`${isSidebarOpen ? "space-y-2" : "space-y-3"}`}>
-                    {menuItems.map((item, index) => {
+                    {items.map((item, index) => {
                         const isActive = pathname === item.href;
 
                         return (

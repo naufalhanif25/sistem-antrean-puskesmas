@@ -32,7 +32,7 @@ export default function LoginForm() {
             const data = await res.json();
 
             if (!res.ok) {
-                showToast(data.error || "Login gagal", "error");
+                showToast(data.message || "Login gagal", "error");
                 return;
             }
             localStorage.setItem("user", JSON.stringify(data));
@@ -40,9 +40,9 @@ export default function LoginForm() {
             showToast("Login berhasil!", "success");
             setTimeout(() => {
                 if (data.role === "ADMIN") {
-                    router.push("/admin");
+                    router.push("/admin/pendaftaran");
                 } else if (data.role === "DOKTER") {
-                    router.push("/dokter");
+                    router.push("/dokter/antrean");
                 } else if (data.role === "LAYAR") {
                     router.push("/layar");
                 }

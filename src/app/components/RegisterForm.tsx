@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "./Sidebar";
+import { AdminSidebarItems } from "../data/sidebar";
 import { useState } from "react";
 import { showToast } from "@/lib/toast";
 import { PasswordInput, UserRole } from "../props/UserData";
@@ -29,7 +30,7 @@ export default function RegisterForm() {
             const data = await res.json();
 
             if (!res.ok) {
-                showToast(data.error || "Registrasi gagal", "error");
+                showToast(data.message || "Registrasi gagal", "error");
                 return;
             }
             showToast("Registrasi berhasil!", "success");
@@ -42,7 +43,7 @@ export default function RegisterForm() {
 
     return (
         <div className="flex h-screen">
-            <Sidebar isDark={isDark} />
+            <Sidebar isDark={isDark} items={AdminSidebarItems} />
             <div
                 className="flex-1 overflow-y-auto transition-colors duration-300"
                 style={{ backgroundColor: isDark ? "#0D0D0D" : "#F9FAFB" }}
@@ -152,7 +153,7 @@ export default function RegisterForm() {
                                     <input
                                         value={nip}
                                         onChange={(e) => setNip(e.target.value)}
-                                        placeholder="Masukkan NIP Anda"
+                                        placeholder="Masukkan NIP"
                                         required
                                         className="w-full rounded-lg px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-2"
                                         style={{
@@ -174,7 +175,7 @@ export default function RegisterForm() {
                                     <input
                                         value={nama}
                                         onChange={(e) => setNama(e.target.value)}
-                                        placeholder="Masukkan Nama Anda"
+                                        placeholder="Masukkan Nama"
                                         required={role === "DOKTER"}
                                         className="w-full rounded-lg px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-2"
                                         style={{
@@ -198,7 +199,7 @@ export default function RegisterForm() {
                                             type={passwordInput}
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
-                                            placeholder="Masukkan Password Anda"
+                                            placeholder="Masukkan Password"
                                             required
                                             className="w-full rounded-lg px-4 py-3 transition-all duration-300 focus:outline-none focus:ring-2"
                                             style={{
