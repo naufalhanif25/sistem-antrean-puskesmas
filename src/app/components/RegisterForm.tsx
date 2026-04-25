@@ -17,6 +17,13 @@ export default function RegisterForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [isDark, setIsDark] = useState(false);
 
+    const handleReset = () => {
+        setNip("");
+        setNama("");
+        setPassword("");
+        setCluster(1);
+    }
+
     const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setIsLoading(true);
@@ -34,6 +41,7 @@ export default function RegisterForm() {
                 return;
             }
             showToast("Registrasi berhasil!", "success");
+            handleReset();
         } catch (error) {
             showToast(error.message || "Terjadi kesalahan saat registrasi", "error");
         } finally {

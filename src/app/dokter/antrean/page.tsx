@@ -260,271 +260,294 @@ export default function AntreanPage() {
                         className="rounded-2xl flex-1 flex flex-col items-center justify-center p-32 overflow-hidden transition-all duration-300"
                     >
                         <div className="flex flex-col w-fit h-fit items-center justify-center gap-6">
-                            <div 
-                                className="min-w-160 min-h-90 h-fit w-fit overflow-hidden relative rounded-2xl bg-red-500 p-8 flex items-center justify-center flex-col"
-                                style={{
-                                    backgroundColor: isDark ? "#1A1A1A" : "#FFFFFF",
-                                    border: isDark
-                                        ? "1px solid #2A2A2A"
-                                        : "1px solid #E5E7EB",
-                                    color: isDark
-                                        ? "#E5E7EB"
-                                        : "#374151",
-                                }}
-                            >
-                                {(() => {
-                                    const currentItem = queueData[queueIndex];
+                            {queueData.length > 0 ? (
+                                <>
+                                    <div 
+                                        className="min-w-160 min-h-90 h-fit w-fit overflow-hidden relative rounded-2xl bg-red-500 p-8 flex items-center justify-center flex-col"
+                                        style={{
+                                            backgroundColor: isDark ? "#1A1A1A" : "#FFFFFF",
+                                            border: isDark
+                                                ? "1px solid #2A2A2A"
+                                                : "1px solid #E5E7EB",
+                                            color: isDark
+                                                ? "#E5E7EB"
+                                                : "#374151",
+                                        }}
+                                    >
+                                        {(() => {
+                                            const currentItem = queueData[queueIndex];
 
-                                    if (!currentItem) return;
-                                    
-                                    return (
-                                        <>
-                                            <span 
-                                                className="w-12 h-12 text-xl font-medium rounded-br-xl absolute top-0 left-0 flex items-center justify-center overflow-hidden"
-                                                style={{
-                                                    backgroundColor: isDark
-                                                        ? "#E5E7EB"
-                                                        : "#DC2626",
-                                                    color: isDark
-                                                        ? "#1A1A1A"
-                                                        : "#FFFFFF"
-                                                }}    
-                                            >
-                                                {queueIndex + 1}
-                                            </span>
-                                            <div className="flex flex-col items-center justify-center w-full flex-1 gap-4">
-                                                <span className="flex flex-col items-center justify-center w-fit h-fit">
-                                                    <h1 className="text-4xl font-semibold text-nowrap truncate w-full">
-                                                        {currentItem.patientName}
-                                                    </h1>
-                                                    <h2 className="text-md opacity-80">
-                                                        {currentItem.queueNumber} | {`Cluster ${currentItem.cluster.toString().slice(7)}`}
-                                                    </h2>
-                                                </span>
-                                                <span className="flex items-center justify-center w-fit h-fit gap-4">
+                                            if (!currentItem) return;
+                                            
+                                            return (
+                                                <>
                                                     <span 
-                                                        className="size-4 rounded-full"
+                                                        className="w-12 h-12 text-xl font-medium rounded-br-xl absolute top-0 left-0 flex items-center justify-center overflow-hidden"
                                                         style={{
-                                                            backgroundColor: getStatusColor(currentItem.status)
-                                                        }}
+                                                            backgroundColor: isDark
+                                                                ? "#E5E7EB"
+                                                                : "#DC2626",
+                                                            color: isDark
+                                                                ? "#1A1A1A"
+                                                                : "#FFFFFF"
+                                                        }}    
                                                     >
-
+                                                        {queueIndex + 1}
                                                     </span>
-                                                    <h2 className="text-sm opacity-80">
-                                                        {currentItem?.status}
-                                                    </h2>
-                                                </span>
-                                            </div>
-                                            <div className="w-full h-fit flex items-center justify-center gap-4">
-                                                <button
-                                                    onClick={() =>
-                                                        handlePanggil(
-                                                            currentItem.id,
-                                                        )
-                                                    }
-                                                    className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
-                                                    style={{
-                                                        backgroundColor:
-                                                            isDark
-                                                                ? "#065F46"
-                                                                : "#D1FAE5",
-                                                        color: isDark
-                                                            ? "#6EE7B7"
-                                                            : "#065F46",
-                                                        border: isDark
-                                                            ? "1px solid #047857"
-                                                            : "1px solid #10B981",
-                                                    }}
-                                                >
-                                                    Panggil
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        handleLewati(
-                                                            currentItem.id,
-                                                        );
-                                                        if (queueIndex < maxIndex) setQueueIndex((current) => current + 1);
-                                                    }
-                                                    }
-                                                    className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
-                                                    style={{
-                                                        backgroundColor:
-                                                            isDark
-                                                                ? "#7F1D1D"
-                                                                : "#FEE2E2",
-                                                        color: isDark
-                                                            ? "#FCA5A5"
-                                                            : "#DC2626",
-                                                        border: isDark
-                                                            ? "1px solid #991B1B"
-                                                            : "1px solid #DC2626",
-                                                    }}
-                                                >
-                                                    Lewati
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handlePeriksa(
-                                                            currentItem.id,
-                                                        )
-                                                    }
-                                                    className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
-                                                    style={{
-                                                        backgroundColor: isDark
-                                                            ? "#78350F"
-                                                            : "#FEF3C7",
-                                                        color: isDark
-                                                            ? "#FCD34D"
-                                                            : "#92400E",
-                                                        border: isDark
-                                                            ? "1px solid #D97706"
-                                                            : "1px solid #F59E0B",
-                                                    }}
-                                                >
-                                                    Periksa
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        handleSelesai(
-                                                            currentItem.id,
-                                                        )
-                                                    }
-                                                    className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
-                                                    style={{
-                                                        backgroundColor:
-                                                            isDark
-                                                                ? "#1E40AF"
-                                                                : "#DBEAFE",
-                                                        color: isDark
-                                                            ? "#93C5FD"
-                                                            : "#1E40AF",
-                                                        border: isDark
-                                                            ? "1px solid #1E3A8A"
-                                                            : "1px solid #93C5FD",
-                                                    }}
-                                                >
-                                                    Selesai
-                                                </button>
-                                            </div>
-                                        </>
-                                    )
-                                })()}
-                            </div>
-                            <div
-                                className="flex items-center justify-center w-fit h-fit gap-4"
-                                style={{
-                                    color: isDark
-                                        ? "#E5E7EB"
-                                        : "#374151"
-                                }}
-                            >
-                                <button 
-                                    onMouseEnter={() => {
-                                        if (queueIndex > 0) setIsPreviousHovered(true);
-                                    }}
-                                    onMouseLeave={() => {
-                                        if (queueIndex > 0 || isPreviousHovered) setIsPreviousHovered(false);
-                                    }}
-                                    onClick={() => {
-                                        if (queueIndex > 0) setQueueIndex((current) => current - 1);
-                                    }}
-                                    className="size-8 transition-all duration-300 rounded-full text-lg p-2 flex items-center justify-center"
-                                    style={{
-                                        opacity: `${queueIndex > 0 ? "100%" : "50%"}`,
-                                        pointerEvents: `${queueIndex > 0 ? "auto" : "none"}`,
-                                        backgroundColor: isPreviousHovered
-                                            ? isDark
-                                                ? "#25272A"
-                                                : "#FEE2E2"
-                                            : isDark
-                                            ? "#1A1A1A"
-                                            : "#FFFFFF",
-                                        border: isPreviousHovered
-                                            ? isDark
-                                                ? "1px solid #333336"
-                                                : "1px solid #FCA5A5"
-                                            : isDark
-                                            ? "1px solid #2A2A2A"
-                                            : "1px solid #E5E7EB",
-                                        color: isPreviousHovered
-                                            ? isDark
+                                                    <div className="flex flex-col items-center justify-center w-full flex-1 gap-4">
+                                                        <span className="flex flex-col items-center justify-center w-fit h-fit">
+                                                            <h1 className="text-4xl font-semibold text-center text-nowrap truncate w-full">
+                                                                {currentItem.patientName}
+                                                            </h1>
+                                                            <h2 className="text-md opacity-80 text-center">
+                                                                {currentItem.queueNumber} | {`Cluster ${currentItem.cluster.toString().slice(7)}`}
+                                                            </h2>
+                                                        </span>
+                                                        <span className="flex items-center justify-center w-fit h-fit gap-4">
+                                                            <span 
+                                                                className="size-4 rounded-full"
+                                                                style={{
+                                                                    backgroundColor: getStatusColor(currentItem.status)
+                                                                }}
+                                                            >
+
+                                                            </span>
+                                                            <h2 className="text-sm opacity-80">
+                                                                {currentItem?.status}
+                                                            </h2>
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full h-fit flex items-center justify-center gap-4">
+                                                        <button
+                                                            onClick={() =>
+                                                                handlePanggil(
+                                                                    currentItem.id,
+                                                                )
+                                                            }
+                                                            className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    isDark
+                                                                        ? "#065F46"
+                                                                        : "#D1FAE5",
+                                                                color: isDark
+                                                                    ? "#6EE7B7"
+                                                                    : "#065F46",
+                                                                border: isDark
+                                                                    ? "1px solid #047857"
+                                                                    : "1px solid #10B981",
+                                                            }}
+                                                        >
+                                                            Panggil
+                                                        </button>
+                                                        <button
+                                                            onClick={() => {
+                                                                handleLewati(
+                                                                    currentItem.id,
+                                                                );
+                                                                if (queueIndex < maxIndex) setQueueIndex((current) => current + 1);
+                                                            }
+                                                            }
+                                                            className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    isDark
+                                                                        ? "#7F1D1D"
+                                                                        : "#FEE2E2",
+                                                                color: isDark
+                                                                    ? "#FCA5A5"
+                                                                    : "#DC2626",
+                                                                border: isDark
+                                                                    ? "1px solid #991B1B"
+                                                                    : "1px solid #DC2626",
+                                                            }}
+                                                        >
+                                                            Lewati
+                                                        </button>
+                                                        <button
+                                                            onClick={() =>
+                                                                handlePeriksa(
+                                                                    currentItem.id,
+                                                                )
+                                                            }
+                                                            className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                            style={{
+                                                                backgroundColor: isDark
+                                                                    ? "#78350F"
+                                                                    : "#FEF3C7",
+                                                                color: isDark
+                                                                    ? "#FCD34D"
+                                                                    : "#92400E",
+                                                                border: isDark
+                                                                    ? "1px solid #D97706"
+                                                                    : "1px solid #F59E0B",
+                                                            }}
+                                                        >
+                                                            Periksa
+                                                        </button>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleSelesai(
+                                                                    currentItem.id,
+                                                                )
+                                                            }
+                                                            className="px-3 py-2 max-w-[120px] cursor-pointer opacity-50 hover:opacity-100 transition-opacity duration-300 rounded-lg text-xs font-medium transition-all duration-150 flex-1 min-w-max"
+                                                            style={{
+                                                                backgroundColor:
+                                                                    isDark
+                                                                        ? "#1E40AF"
+                                                                        : "#DBEAFE",
+                                                                color: isDark
+                                                                    ? "#93C5FD"
+                                                                    : "#1E40AF",
+                                                                border: isDark
+                                                                    ? "1px solid #1E3A8A"
+                                                                    : "1px solid #93C5FD",
+                                                            }}
+                                                        >
+                                                            Selesai
+                                                        </button>
+                                                    </div>
+                                                </>
+                                            )
+                                        })()}
+                                    </div>
+                                    <div
+                                        className="flex items-center justify-center w-fit h-fit gap-4"
+                                        style={{
+                                            color: isDark
                                                 ? "#E5E7EB"
-                                                : "#DC2626"
-                                            : isDark
-                                            ? "#E5E7EB"
-                                            : "#374151",
-                                    }}  
-                                >
-                                    <svg 
-                                        className="w-full h-full" 
-                                        viewBox="0 0 24 24" 
-                                        fill="none" 
-                                        xmlns="http://www.w3.org/2000/svg"
+                                                : "#374151"
+                                        }}
                                     >
-                                        <path 
-                                            d="M15 20L7 12L15 4" 
-                                            stroke="currentColor" 
-                                            strokeWidth="3" 
-                                            strokeLinecap="round" strokeLinejoin="round"
-                                        />
-                                    </svg>
-                                </button>
-                                <p className="text-md opacity-80">
-                                    {queueIndex + 1} dari {maxIndex + 1}
-                                </p>
-                                <button 
-                                    onMouseEnter={() => {
-                                        if (queueIndex < maxIndex) setIsNextHovered(true);
-                                    }}
-                                    onMouseLeave={() => {
-                                        if (queueIndex < maxIndex || isNextHovered) setIsNextHovered(false);
-                                    }}
-                                    onClick={() => {
-                                        if (queueIndex < maxIndex) setQueueIndex((current) => current + 1);
-                                    }}
-                                    className="size-8 transition-all duration-300 rounded-full text-lg p-2 flex items-center justify-center"
+                                        <button 
+                                            onMouseEnter={() => {
+                                                if (queueIndex > 0) setIsPreviousHovered(true);
+                                            }}
+                                            onMouseLeave={() => {
+                                                if (queueIndex > 0 || isPreviousHovered) setIsPreviousHovered(false);
+                                            }}
+                                            onClick={() => {
+                                                if (queueIndex > 0) setQueueIndex((current) => current - 1);
+                                            }}
+                                            className="size-8 transition-all duration-300 rounded-full text-lg p-2 flex items-center justify-center"
+                                            style={{
+                                                opacity: `${queueIndex > 0 ? "100%" : "50%"}`,
+                                                pointerEvents: `${queueIndex > 0 ? "auto" : "none"}`,
+                                                backgroundColor: isPreviousHovered
+                                                    ? isDark
+                                                        ? "#25272A"
+                                                        : "#FEE2E2"
+                                                    : isDark
+                                                    ? "#1A1A1A"
+                                                    : "#FFFFFF",
+                                                border: isPreviousHovered
+                                                    ? isDark
+                                                        ? "1px solid #333336"
+                                                        : "1px solid #FCA5A5"
+                                                    : isDark
+                                                    ? "1px solid #2A2A2A"
+                                                    : "1px solid #E5E7EB",
+                                                color: isPreviousHovered
+                                                    ? isDark
+                                                        ? "#E5E7EB"
+                                                        : "#DC2626"
+                                                    : isDark
+                                                    ? "#E5E7EB"
+                                                    : "#374151",
+                                            }}  
+                                        >
+                                            <svg 
+                                                className="w-full h-full" 
+                                                viewBox="0 0 24 24" 
+                                                fill="none" 
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path 
+                                                    d="M15 20L7 12L15 4" 
+                                                    stroke="currentColor" 
+                                                    strokeWidth="3" 
+                                                    strokeLinecap="round" strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                        </button>
+                                        <p className="text-md opacity-80">
+                                            {queueIndex + 1} dari {maxIndex + 1}
+                                        </p>
+                                        <button 
+                                            onMouseEnter={() => {
+                                                if (queueIndex < maxIndex) setIsNextHovered(true);
+                                            }}
+                                            onMouseLeave={() => {
+                                                if (queueIndex < maxIndex || isNextHovered) setIsNextHovered(false);
+                                            }}
+                                            onClick={() => {
+                                                if (queueIndex < maxIndex) setQueueIndex((current) => current + 1);
+                                            }}
+                                            className="size-8 transition-all duration-300 rounded-full text-lg p-2 flex items-center justify-center"
+                                            style={{
+                                                opacity: `${queueIndex < maxIndex ? "100%" : "50%"}`,
+                                                pointerEvents: `${queueIndex < maxIndex ? "auto" : "none"}`,
+                                                backgroundColor: isNextHovered
+                                                    ? isDark
+                                                        ? "#25272A"
+                                                        : "#FEE2E2"
+                                                    : isDark
+                                                    ? "#1A1A1A"
+                                                    : "#FFFFFF",
+                                                border: isNextHovered
+                                                    ? isDark
+                                                        ? "1px solid #333336"
+                                                        : "1px solid #FCA5A5"
+                                                    : isDark
+                                                    ? "1px solid #2A2A2A"
+                                                    : "1px solid #E5E7EB",
+                                                color: isNextHovered
+                                                    ? isDark
+                                                        ? "#E5E7EB"
+                                                        : "#DC2626"
+                                                    : isDark
+                                                    ? "#E5E7EB"
+                                                    : "#374151",
+                                            }} 
+                                        >
+                                            <svg 
+                                                className="w-full h-full rotate-z-180" 
+                                                viewBox="0 0 24 24" 
+                                                fill="none" 
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path 
+                                                    d="M15 20L7 12L15 4" 
+                                                    stroke="currentColor" 
+                                                    strokeWidth="3" 
+                                                    strokeLinecap="round" strokeLinejoin="round"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </>
+                            ): (
+                                <div 
+                                    className="max-w-120 max-h-20 h-fit w-fit py-5 px-8 rounded-lg"
                                     style={{
-                                        opacity: `${queueIndex < maxIndex ? "100%" : "50%"}`,
-                                        pointerEvents: `${queueIndex < maxIndex ? "auto" : "none"}`,
-                                        backgroundColor: isNextHovered
-                                            ? isDark
-                                                ? "#25272A"
-                                                : "#FEE2E2"
-                                            : isDark
-                                            ? "#1A1A1A"
-                                            : "#FFFFFF",
-                                        border: isNextHovered
-                                            ? isDark
-                                                ? "1px solid #333336"
-                                                : "1px solid #FCA5A5"
-                                            : isDark
+                                        backgroundColor: isDark ? "#1A1A1A" : "#FFFFFF",
+                                        border: isDark
                                             ? "1px solid #2A2A2A"
-                                            : "1px solid #E5E7EB",
-                                        color: isNextHovered
-                                            ? isDark
-                                                ? "#E5E7EB"
-                                                : "#DC2626"
-                                            : isDark
-                                            ? "#E5E7EB"
-                                            : "#374151",
-                                    }} 
+                                            : "1px solid #E5E7EB"
+                                    }}
                                 >
-                                    <svg 
-                                        className="w-full h-full rotate-z-180" 
-                                        viewBox="0 0 24 24" 
-                                        fill="none" 
-                                        xmlns="http://www.w3.org/2000/svg"
+                                    <h4
+                                        className="text-sm"
+                                        style={{
+                                            color: isDark ? "#9CA3AF" : "#6B7280",
+                                        }}
                                     >
-                                        <path 
-                                            d="M15 20L7 12L15 4" 
-                                            stroke="currentColor" 
-                                            strokeWidth="3" 
-                                            strokeLinecap="round" strokeLinejoin="round"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
+                                        Tidak ada data antrean saat ini
+                                    </h4>
+                                </div>
+                            )}
+                        </div>    
                     </div>
                 </div>
             </div>

@@ -56,6 +56,10 @@ export default function PendaftaranPage() {
         }
     };
 
+    const printStrukAntrean = () => {
+        // TODO: Logika print struk antrean
+    };
+
     return (
         <div className="flex h-screen">
             <Sidebar isDark={isDark} items={AdminSidebarItems} />
@@ -65,6 +69,7 @@ export default function PendaftaranPage() {
                 show={showPopup}
                 yesButtonCallback={async () => {
                     await handleSubmitAntrean();
+                    printStrukAntrean();
                     setShowPopup(false);
                 }}
                 noButtonCallback={async () => {

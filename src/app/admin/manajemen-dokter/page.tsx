@@ -5,13 +5,20 @@ import { useState, useEffect } from "react";
 import { AdminSidebarItems } from "@/app/data/sidebar";
 import { showToast } from "@/lib/toast";
 import { UserData } from "@/app/props/UserData";
+import Popup from "@/app/components/Popup";
+
+interface DoctorData {
+    id: number; 
+    cluster: number; 
+    doctorName: string;
+}
 
 export default function ManajemenDokterPage() {
     const [isDark, setIsDark] = useState(false);
     const [userData, setUserData] = useState<UserData | null>(null);
-    const [doctors, setDoctors] = useState<
-        { id: number, cluster: number; doctorName: string }[]
-    >([]);
+    const [showPopup, setShowPopup] = useState<boolean>(false);
+    const [currentUserData, setCurrentUserData] = useState<DoctorData | null>(null);
+    const [doctors, setDoctors] = useState<DoctorData[]>([]);
 
     const fetchData = async () => {
         try {
@@ -63,6 +70,23 @@ export default function ManajemenDokterPage() {
     return (
         <div className="flex h-screen">
             <Sidebar isDark={isDark} items={AdminSidebarItems} />
+            <Popup 
+                title="Hapus Data Dokter?"
+                description={
+                    `Apakah Anda yakin ingin menghapus data dokter ${currentUserData?.doctorName} 
+                    dari Cluster ${currentUserData?.cluster}?`
+                }
+                show={showPopup}
+                noButtonCallback={() => {
+                    setCurrentUserData(null);
+                    setShowPopup(false);
+                }}
+                yesButtonCallback={async () => {
+                    await handleHapus(currentUserData?.id);
+                    setCurrentUserData(null);
+                    setShowPopup(false);
+                }}
+            />
             <div
                 className="flex-1 overflow-y-auto transition-colors duration-300"
                 style={{
@@ -117,69 +141,95 @@ export default function ManajemenDokterPage() {
                         </p>
                     </div>
                     <div className="overflow-hidden transition-all duration-300 flex flex-col items-center justify-center gap-1">
-                        {doctors.map((item, index) => {
-                            return (
-                                <div 
-                                    className="w-full px-5 py-3 rounded-lg flex items-center justify-between w-full h-fit" 
-                                    key={index}
+                        {doctors.length > 0 ? (
+                            <>
+                                {doctors.map((item, index) => {
+                                    return (
+                                        <div 
+                                            className="w-full px-5 py-3 rounded-lg flex items-center justify-between w-full h-fit" 
+                                            key={index}
+                                            style={{
+                                                backgroundColor: isDark ? "#1A1A1A" : "#FFFFFF",
+                                                border: isDark
+                                                    ? "1px solid #2A2A2A"
+                                                    : "1px solid #E5E7EB",
+                                            }}
+                                        >
+                                            <span className="flex items-center justify-center w-fit h-fit gap-4">
+                                                <p
+                                                    className="text-md opacity-50"
+                                                    style={{
+                                                        color: isDark ? "#9CA3AF" : "#6B7280",
+                                                    }}
+                                                >
+                                                    {index + 1}
+                                                </p>
+                                                <span className="flex flex-col items-start justify-center">
+                                                    <h2 
+                                                        className="text-md"
+                                                        style={{
+                                                            color: isDark ? "#FFFFFF" : "#111827",
+                                                        }}
+                                                    >
+                                                        {item.doctorName}
+                                                    </h2>
+                                                    <h3
+                                                        className="text-sm"
+                                                        style={{
+                                                            color: isDark ? "#9CA3AF" : "#6B7280",
+                                                        }}
+                                                    >
+                                                        Cluster {item.cluster}
+                                                    </h3>
+                                                </span>
+                                            </span>
+                                            <span className="flex items-center justify-center w-fit h-fit gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setCurrentUserData(item)
+                                                        setShowPopup(true);
+                                                    }}
+                                                    className="px-6 py-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-pointer rounded-lg text-xs font-medium"
+                                                    style={{
+                                                        backgroundColor:
+                                                            isDark
+                                                                ? "#7F1D1D"
+                                                                : "#FEE2E2",
+                                                        color: isDark
+                                                            ? "#FCA5A5"
+                                                            : "#DC2626",
+                                                        border: isDark
+                                                            ? "1px solid #991B1B"
+                                                            : "1px solid #DC2626"
+                                                    }}
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </>
+                        ): (
+                            <div 
+                                className="w-full h-16 flex items-center justify-center rounded-lg"
+                                style={{
+                                    backgroundColor: isDark ? "#1A1A1A" : "#FFFFFF",
+                                    border: isDark
+                                        ? "1px solid #2A2A2A"
+                                        : "1px solid #E5E7EB",
+                                }}
+                            >
+                                <h4
+                                    className="text-sm"
                                     style={{
-                                        backgroundColor: isDark ? "#1A1A1A" : "#FFFFFF",
-                                        border: isDark
-                                            ? "1px solid #2A2A2A"
-                                            : "1px solid #E5E7EB",
+                                        color: isDark ? "#9CA3AF" : "#6B7280",
                                     }}
                                 >
-                                    <span className="flex items-center justify-center w-fit h-fit gap-4">
-                                        <p
-                                            className="text-md opacity-50"
-                                            style={{
-                                                color: isDark ? "#9CA3AF" : "#6B7280",
-                                            }}
-                                        >
-                                            {index + 1}
-                                        </p>
-                                        <span className="flex flex-col items-start justify-center">
-                                            <h2 
-                                                className="text-md"
-                                                style={{
-                                                    color: isDark ? "#FFFFFF" : "#111827",
-                                                }}
-                                            >
-                                                {item.doctorName}
-                                            </h2>
-                                            <h3
-                                                className="text-sm"
-                                                style={{
-                                                    color: isDark ? "#9CA3AF" : "#6B7280",
-                                                }}
-                                            >
-                                                Cluster {item.cluster}
-                                            </h3>
-                                        </span>
-                                    </span>
-                                    <span className="flex items-center justify-center w-fit h-fit gap-2">
-                                        <button
-                                            onClick={() => handleHapus(item.id)}
-                                            className="px-6 py-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-pointer rounded-lg text-xs font-medium"
-                                            style={{
-                                                backgroundColor:
-                                                    isDark
-                                                        ? "#7F1D1D"
-                                                        : "#FEE2E2",
-                                                color: isDark
-                                                    ? "#FCA5A5"
-                                                    : "#DC2626",
-                                                border: isDark
-                                                    ? "1px solid #991B1B"
-                                                    : "1px solid #DC2626"
-                                            }}
-                                        >
-                                            Hapus
-                                        </button>
-                                    </span>
-                                </div>
-                            );
-                        })}
+                                    Tidak ada data dokter yang tersedia
+                                </h4>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

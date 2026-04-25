@@ -244,8 +244,7 @@ export default function DisplayPage() {
 
     const currentCalled = useMemo(() => {
         return (
-            queueItems.find((item) => item.status === "Dipanggil") ||
-            queueItems[0]
+            queueItems.find((item) => item.status === "Dipanggil")
         );
     }, [queueItems]);
 
