@@ -620,9 +620,11 @@ export default function DaftarAntreanPage() {
                                     color: isDark ? "#9CA3AF" : "#6B7280",
                                 }}
                             >
-                                Menampilkan {startIndex + 1}{"-"}
-                                {Math.min(endIndex, queueData.length)}{" dari "}
-                                {queueData.length} Pasien
+                                {queueData.length > 0 ? (
+                                    `Menampilkan ${startIndex + 1}-${Math.min(endIndex, queueData.length)} dari ${queueData.length} Pasien`
+                                ): (
+                                    `Tidak ada data antrean saat ini`
+                                )}
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
